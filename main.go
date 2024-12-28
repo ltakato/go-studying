@@ -7,6 +7,11 @@ import (
 	"go-studying/tasks"
 )
 
+type RunDef struct {
+	Task       func(chan tasks.TaskResult)
+	PostAction func()
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -17,22 +22,33 @@ func main() {
 	sleeper := &core.RealSleeper{}
 	taskRunner := tasks.New(sleeper)
 
-	tasksDefs := []func(chan tasks.TaskResult){
-		taskRunner.TripStatusUpdate,
-		taskRunner.PaymentProcessing,
+	runDefs := []RunDef{
+		{
+			Task: taskRunner.TripStatusUpdate,
+			PostAction: func() {
+				fmt.Println("Processed: trip status update task")
+			},
+		},
+		{
+			Task: taskRunner.PaymentProcessing,
+			PostAction: func() {
+				fmt.Println("Processed: payment processing task")
+				cancel()
+			},
+		},
 	}
 
-	for _, task := range tasksDefs {
-		go task(results)
+	for _, runDef := range runDefs {
+		go func() {
+			runDef.Task(results)
+			runDef.PostAction()
+		}()
 	}
 
 	for {
 		select {
 		case result := <-results:
 			fmt.Println("Result:", result.Message)
-			if result.Key == tasks.PaymentProcessed {
-				cancel()
-			}
 		case <-ctx.Done():
 			fmt.Println("Process finished")
 			return
