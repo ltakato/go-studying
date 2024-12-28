@@ -9,7 +9,7 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	fmt.Println("start processing...")
+	fmt.Println("Start processing...")
 
 	results := make(chan tasks.TaskResult)
 
