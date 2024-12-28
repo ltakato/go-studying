@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"go-studying/core"
 	"go-studying/tasks"
 )
 
@@ -13,9 +14,12 @@ func main() {
 
 	results := make(chan tasks.TaskResult)
 
+	sleeper := &core.RealSleeper{}
+	taskRunner := tasks.New(sleeper)
+
 	tasksDefs := []func(chan tasks.TaskResult){
-		tasks.TripStatusUpdate,
-		tasks.PaymentProcessing,
+		taskRunner.TripStatusUpdate,
+		taskRunner.PaymentProcessing,
 	}
 
 	for _, task := range tasksDefs {
