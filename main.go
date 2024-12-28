@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-studying/core"
 	"go-studying/tasks"
+	"time"
 )
 
 type RunDef struct {
@@ -15,7 +16,7 @@ type RunDef struct {
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	fmt.Println("Start processing...")
+	fmt.Println("Start processing: ", time.Now())
 
 	results := make(chan tasks.TaskResult)
 
@@ -50,7 +51,7 @@ func main() {
 		case result := <-results:
 			fmt.Println("Result:", result.Message)
 		case <-ctx.Done():
-			fmt.Println("Process finished")
+			fmt.Println("Process finished: ", time.Now())
 			return
 		}
 	}
